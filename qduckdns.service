@@ -1,0 +1,15 @@
+[Unit]
+Description=qduckdns
+After=network.target
+
+[Service]
+Type=simple
+#User=myappuser
+#Group=myappuser
+ExecStart=/opt/qduckdns/bin/qduckdns
+Restart=always
+RestartSec=5
+Environment=
+
+[Install]
+WantedBy=multi-user.target
