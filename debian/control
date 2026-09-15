@@ -1,0 +1,20 @@
+Source: qduckdns
+Section: unknown
+Priority: optional
+Maintainer: coolshou <coolshou2060@gmail.com>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+Standards-Version: 4.6.2
+Homepage: https://github.com/coolshou/qduckdns.git
+#Vcs-Browser: https://salsa.debian.org/debian/qduckdns
+#Vcs-Git: https://salsa.debian.org/debian/qduckdns.git
+
+Package: qduckdns
+Architecture: any
+Multi-Arch: foreign
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: update A record of duckdns
+ update A record of duckdns
