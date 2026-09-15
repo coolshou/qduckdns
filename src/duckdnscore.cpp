@@ -5,7 +5,8 @@
 #include <QDir>
 #include <QFile>
 #include <QUrlQuery>
-
+#include <QHostAddress>
+#include <QDnsHostAddressRecord>
 #include <QDebug>
 
 DuckdnsCore::DuckdnsCore(QString domains,
