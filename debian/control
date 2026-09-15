@@ -5,6 +5,8 @@ Maintainer: coolshou <coolshou2060@gmail.com>
 Rules-Requires-Root: no
 Build-Depends:
  debhelper-compat (= 13),
+ qt6-base-dev, 
+ qt6-l10n-tools
 Standards-Version: 4.6.2
 Homepage: https://github.com/coolshou/qduckdns.git
 #Vcs-Browser: https://salsa.debian.org/debian/qduckdns
