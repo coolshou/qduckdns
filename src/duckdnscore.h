@@ -24,7 +24,6 @@ public slots:
     qint64 msecToNextTarget(QTime target);
 private slots:
     void onFinished(QNetworkReply *reply);
-    void onErrorOccurred(QNetworkReply::NetworkError error);
 signals:
 private:
     QNetworkAccessManager *manager;

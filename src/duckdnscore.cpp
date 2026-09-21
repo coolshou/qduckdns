@@ -25,7 +25,6 @@ DuckdnsCore::DuckdnsCore(QString domains,
     m_url = "https://www.duckdns.org/update";
     manager = new QNetworkAccessManager();
     QObject::connect(manager, &QNetworkAccessManager::finished, this, &DuckdnsCore::onFinished);
-    // QObject::connect(m_reply, &QNetworkReply::errorOccurred, this, &DuckdnsCore::onErrorOccurred);
 
     sslConfig = QSslConfiguration::defaultConfiguration();
     sslConfig.setPeerVerifyMode(QSslSocket::VerifyNone);
@@ -105,15 +104,6 @@ void DuckdnsCore::handleDNSServers()
     m_dns->deleteLater();
 }
 
-void DuckdnsCore::onErrorOccurred(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    if (!reply)
-        return;
-
-    qWarning() << "Error:" << error << " " << reply->errorString();
-}
-
 void DuckdnsCore::onTimeout()
 {
     // qDebug() << "onTimeout update";
@@ -172,7 +162,9 @@ void DuckdnsCore::onFinished(QNetworkReply *reply)
         if (logFile.open(QIODevice::WriteOnly | QIODevice::Append))
         {
             QTextStream out(&logFile);
-            out << response_time << "\t Update Fail (" << reply->error() << ":" << reply->errorString() << ")\r\n";
+            QString s = response_time + "\t Update Fail (" + reply->error() + ":" + reply->errorString() + ")\r\n";
+            out << s;
+            qDebug() << s;
         }
     }
 
