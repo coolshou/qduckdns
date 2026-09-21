@@ -1,1 +1,6 @@
 /.qtcreator/*.user
+/*.o
+/moc_*.cpp
+/.qm*
+/debian/.debhelper*
+/debian/qduckdns*
