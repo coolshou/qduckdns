@@ -37,3 +37,7 @@ unix:!android:
     INSTALLS += \
         myfiles \
         cfgfiles
+
+DEBFILES += \
+   debian/changelog \
+   debian/control
