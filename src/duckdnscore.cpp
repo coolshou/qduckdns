@@ -162,7 +162,10 @@ void DuckdnsCore::onFinished(QNetworkReply *reply)
         if (logFile.open(QIODevice::WriteOnly | QIODevice::Append))
         {
             QTextStream out(&logFile);
-            QString s = response_time + "\t Update Fail (" + reply->error() + ":" + reply->errorString() + ")\r\n";
+            QString s = QString("%1\t Update Fail (%2:%3)\r\n")
+                            .arg(response_time)
+                            .arg(static_cast<int>(reply->error()))
+                            .arg(reply->errorString());
             out << s;
             qDebug() << s;
         }
