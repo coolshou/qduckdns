@@ -27,6 +27,10 @@ DuckdnsCore::DuckdnsCore(QString domains, QString token, QObject *parent)
   sslConfig = QSslConfiguration::defaultConfiguration();
   sslConfig.setPeerVerifyMode(QSslSocket::VerifyNone);
 
+  m_retryTimer = new QTimer(this);
+  m_retryTimer->setSingleShot(true);
+  connect(m_retryTimer, &QTimer::timeout, this, &DuckdnsCore::update);
+
   // timer
   //  timer = new QTimer(this);
   //  connect(timer, &QTimer::timeout, this, &DuckdnsCore::onTimeout);
@@ -113,6 +117,10 @@ void DuckdnsCore::setupDailyTimer() {
   m_dailyTimer->setSingleShot(true);
 
   connect(m_dailyTimer, &QTimer::timeout, this, [this, targetTime]() {
+    m_retryCount = 0; // 重置重試計數
+    if (m_retryTimer && m_retryTimer->isActive()) {
+      m_retryTimer->stop();
+    }
     // 執行目標函式
     update();
     // 重新設定，等下一個 24 小時
@@ -146,18 +154,47 @@ void DuckdnsCore::onFinished(QNetworkReply *reply) {
   QDateTime d = QDateTime::currentDateTime();
   response_time = d.toString("yyyy/MM/dd_hh:mm:ss");
   if (reply->error() == QNetworkReply::NoError) {
+    m_retryCount = 0; // 成功更新，重置重試計數
+    if (m_retryTimer && m_retryTimer->isActive()) {
+      m_retryTimer->stop();
+    }
     response = reply->readAll(); // 先存
     nslookup(m_domains + ".duckdns.org");
   } else {
+    QString s = QString("%1\t Update Fail (%2:%3)")
+                    .arg(response_time)
+                    .arg(static_cast<int>(reply->error()))
+                    .arg(reply->errorString());
+    qDebug() << s;
+
+    QString retryMsg;
+    if (reply->error() == QNetworkReply::TimeoutError) {
+      if (m_retryCount < MAX_RETRIES) {
+        m_retryCount++;
+        retryMsg = QString("%1\t Update timed out. Scheduling retry %2/%3 in 3 minutes...")
+                       .arg(response_time)
+                       .arg(m_retryCount)
+                       .arg(MAX_RETRIES);
+        qWarning() << retryMsg;
+        if (m_retryTimer) {
+          m_retryTimer->start(3 * 60 * 1000); // 3 分鐘後再試
+        }
+      } else {
+        retryMsg = QString("%1\t Update timed out. Reached maximum retries (%2). Waiting for next schedule.")
+                       .arg(response_time)
+                       .arg(MAX_RETRIES);
+        qWarning() << retryMsg;
+        m_retryCount = 0;
+      }
+    }
+
     QFile logFile(m_logfile);
     if (logFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
       QTextStream out(&logFile);
-      QString s = QString("%1\t Update Fail (%2:%3)\r\n")
-                      .arg(response_time)
-                      .arg(static_cast<int>(reply->error()))
-                      .arg(reply->errorString());
-      out << s;
-      qDebug() << s;
+      out << s << "\r\n";
+      if (!retryMsg.isEmpty()) {
+        out << retryMsg << "\r\n";
+      }
     }
   }
 

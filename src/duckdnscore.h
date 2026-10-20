@@ -29,8 +29,10 @@ private:
   QNetworkAccessManager *manager;
   QPointer<QNetworkReply> m_reply = nullptr; // 需要保留 reply 指標
   QSslConfiguration sslConfig;
-  QTimer *timer;
   QTimer *m_dailyTimer = nullptr;
+  QTimer *m_retryTimer = nullptr;
+  int m_retryCount = 0;
+  static constexpr int MAX_RETRIES = 3;
 
   QString m_url;
   QString m_domains;
